@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026新年快乐！</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            color: white;
+            text-align: center;
+        }
+        
+        /* 开始界面 */
+        .start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            z-index: 100;
+            cursor: pointer;
+            transition: opacity 1s ease, visibility 1s ease;
+        }
+        
+        .start-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+        
+        .start-title {
+            font-size: 4rem;
+            margin-bottom: 30px;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            animation: pulse 2s infinite;
+        }
+        
+        .start-hint {
+            font-size: 2rem;
+            color: rgba(255, 255, 255, 0.8);
+            animation: bounce 1.5s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { 
+                text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+                transform: scale(1);
+            }
+            50% { 
+                text-shadow: 0 0 30px rgba(255, 215, 0, 1),
+                             0 0 40px rgba(255, 215, 0, 0.8);
+                transform: scale(1.05);
+            }
+        }
+        
+        .container {
+            max-width: 800px;
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 1s ease, transform 1s ease;
+        }
+        
+        .container.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* 烟花粒子 */
+        .firework-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        /* 点击烟花粒子 */
+        .click-particle {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1;
+            box-shadow: 0 0 5px currentColor;
+        }
+        
+        /* 点击提示文字 */
+        .click-hint {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.7);
+            z-index: 10;
+            animation: pulse 2s infinite;
+        }
+        
+        /* 标题动画 */
+        .title {
+            font-size: 3.5rem;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 10px rgba(255, 215, 0, 0.8),
+                             0 0 20px rgba(255, 215, 0, 0.6),
+                             0 0 30px rgba(255, 215, 0, 0.4);
+            }
+            to {
+                text-shadow: 0 0 20px rgba(255, 215, 0, 1),
+                             0 0 30px rgba(255, 215, 0, 0.8),
+                             0 0 40px rgba(255, 215, 0, 0.6),
+                             0 0 50px rgba(255, 215, 0, 0.4);
+            }
+        }
+        
+        /* 祝福语动画 */
+        .blessing {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            opacity: 0;
+            animation: fadeInUp 1s ease forwards 0.5s;
+        }
+        
+        .blessing-2 {
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+            opacity: 0;
+            animation: fadeInUp 1s ease forwards 1s;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* 倒计时样式 */
+        .countdown {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+        }
+        
+        .countdown-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            min-width: 80px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .countdown-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #FFD700;
+        }
+        
+        .countdown-label {
+            font-size: 0.9rem;
+            margin-top: 5px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        /* 雪花效果 */
+        .snowflake {
+            position: absolute;
+            top: -10px;
+            color: white;
+            font-size: 1.5rem;
+            opacity: 0.8;
+            z-index: 1;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 600px) {
+            .start-title {
+                font-size: 2.5rem;
+            }
+            
+            .start-hint {
+                font-size: 1.5rem;
+            }
+            
+            .title {
+                font-size: 2.5rem;
+            }
+            
+            .blessing {
+                font-size: 1.5rem;
+            }
+            
+            .countdown-item {
+                min-width: 70px;
+                padding: 10px;
+            }
+            
+            .countdown-number {
+                font-size: 2rem;
+            }
+            
+            .click-hint {
+                font-size: 0.9rem;
+                bottom: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 开始界面 -->
+    <div class="start-screen" id="startScreen">
+        <h1 class="start-title">🎆 2026新年快乐 🎆</h1>
+        <p class="start-hint">点击屏幕开始</p>
+    </div>
+    
+    <!-- 主内容容器 -->
+    <div class="container" id="mainContainer">
+        <h1 class="title" id="title">🎉 2026新年快乐！</h1>
+        <p class="blessing" id="blessing">愿新年，胜旧年</p>
+        <p class="blessing-2" id="blessing2">万事顺遂，平安喜乐</p>
+        
+        <div class="countdown">
+            <div class="countdown-item">
+                <div class="countdown-number" id="days">00</div>
+                <div class="countdown-label">天</div>
+            </div>
+            <div class="countdown-item">
+                <div class="countdown-number" id="hours">00</div>
+                <div class="countdown-label">时</div>
+            </div>
+            <div class="countdown-item">
+                <div class="countdown-number" id="minutes">00</div>
+                <div class="countdown-label">分</div>
+            </div>
+            <div class="countdown-item">
+                <div class="countdown-number" id="seconds">00</div>
+                <div class="countdown-label">秒</div>
+            </div>
+        </div>
+        
+        <p style="margin-top: 30px; font-size: 1.2rem; opacity: 0.9;">
+            —— 来自某人的祝福
+        </p>
+    </div>
+    
+    <!-- 点击提示 -->
+    <div class="click-hint" style="display: none;">点击屏幕任意位置放烟花 🎆</div>
+
+    <script>
+        // ==================== 初始化状态 ====================
+        // 主内容初始隐藏
+        document.getElementById('mainContainer').style.display = 'none';
+        document.querySelector('.click-hint').style.display = 'none';
+        
+        // ==================== 开始界面点击事件 ====================
+        document.getElementById('startScreen').addEventListener('click', function() {
+            // 播放欢迎音效
+            playWelcomeSound();
+            
+            // 添加点击烟花效果
+            const x = window.innerWidth / 2;
+            const y = window.innerHeight / 2;
+            createParticleFirework(x, y, true);
+            
+            // 隐藏开始界面
+            this.classList.add('hidden');
+            
+            // 显示主内容
+            setTimeout(() => {
+                document.getElementById('startScreen').style.display = 'none';
+                document.getElementById('mainContainer').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('mainContainer').classList.add('show');
+                }, 50);
+                
+                // 显示点击提示
+                setTimeout(() => {
+                    document.querySelector('.click-hint').style.display = 'block';
+                }, 1500);
+                
+                // 开始自动烟花效果
+                startFireworks();
+                // 开始下雪
+                createSnowfall();
+                setInterval(createSnowfall, 10000);
+                // 开始倒计时
+                startCountdown();
+            }, 1000);
+        });
+        
+        // ==================== 欢迎音效 ====================
+        function playWelcomeSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // 创建一组音符（新年快乐的旋律）
+                const notes = [
+                    { freq: 523.25, duration: 0.3 }, // C5
+                    { freq: 587.33, duration: 0.3 }, // D5
+                    { freq: 659.25, duration: 0.3 }, // E5
+                    { freq: 698.46, duration: 0.5 }, // F5
+                    { freq: 659.25, duration: 0.3 }, // E5
+                    { freq: 587.33, duration: 0.3 }, // D5
+                    { freq: 523.25, duration: 0.5 }, // C5
+                ];
+                
+                let currentTime = audioContext.currentTime;
+                
+                notes.forEach((note, index) => {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.setValueAtTime(note.freq, currentTime);
+                    
+                    gainNode.gain.setValueAtTime(0, currentTime);
+                    gainNode.gain.linearRampToValueAtTime(0.1, currentTime + 0.05);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, currentTime + note.duration);
+                    
+                    oscillator.start(currentTime);
+                    oscillator.stop(currentTime + note.duration);
+                    
+                    currentTime += note.duration;
+                });
+                
+            } catch (error) {
+                console.log("音效不可用，但不影响动画功能");
+            }
+        }
+        
+        // ==================== 烟花效果函数 ====================
+        function createParticleFirework(x, y, isClick = false) {
+            const colors = ['#FFD700', '#FF6B6B', '#4ECDC4', '#FF8E53', '#9D50BB', '#FF4081', '#00BCD4', '#E91E63', '#9C27B0'];
+            const particleCount = isClick ? 50 : 30;
+            const spreadDistance = isClick ? 150 : 100;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add(isClick ? 'click-particle' : 'firework-particle');
+                
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.backgroundColor = color;
+                particle.style.color = color;
+                
+                particle.style.left = `${x}px`;
+                particle.style.top = `${y}px`;
+                
+                document.body.appendChild(particle);
+                
+                const angle = (i / particleCount) * Math.PI * 2;
+                const angleVariance = 0.2;
+                const finalAngle = angle + (Math.random() * angleVariance - angleVariance/2);
+                
+                const targetX = x + Math.cos(finalAngle) * spreadDistance;
+                const targetY = y + Math.sin(finalAngle) * spreadDistance;
+                
+                const size = Math.random() * 6 + 2;
+                
+                particle.animate([
+                    { 
+                        transform: 'translate(0, 0) scale(1)', 
+                        opacity: 1 
+                    },
+                    { 
+                        transform: `translate(${targetX - x}px, ${targetY - y}px) scale(${size/4})`, 
+                        opacity: 0 
+                    }
+                ], {
+                    duration: isClick ? 1200 : 1000,
+                    easing: 'ease-out',
+                    delay: Math.random() * 200
+                });
+                
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.remove();
+                    }
+                }, isClick ? 1200 : 1000);
+            }
+        }
+        
+        // ==================== 自动烟花系统 ====================
+        function createAutoFirework() {
+            const x = Math.random() * (window.innerWidth - 100) + 50;
+            const y = Math.random() * (window.innerHeight - 100) + 50;
+            createParticleFirework(x, y, false);
+        }
+        
+        function createFireworks() {
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => createAutoFirework(), i * 300);
+            }
+        }
+        
+        function startFireworks() {
+            createFireworks();
+            setInterval(createFireworks, 2000);
+        }
+        
+        // ==================== 雪花系统 ====================
+        function createSnowflake() {
+            const snowflake = document.createElement('div');
+            snowflake.classList.add('snowflake');
+            snowflake.innerHTML = '❄';
+            
+            const startX = Math.random() * window.innerWidth;
+            snowflake.style.left = `${startX}px`;
+            
+            document.body.appendChild(snowflake);
+            
+            const animation = snowflake.animate([
+                { transform: 'translateY(0) rotate(0deg)', opacity: 0.8 },
+                { transform: `translateY(${window.innerHeight}px) rotate(360deg)`, opacity: 0 }
+            ], {
+                duration: Math.random() * 5000 + 5000,
+                easing: 'linear'
+            });
+            
+            animation.onfinish = () => {
+                snowflake.remove();
+            };
+        }
+        
+        function createSnowfall() {
+            for (let i = 0; i < 15; i++) {
+                setTimeout(() => createSnowflake(), i * 300);
+            }
+        }
+        
+        // ==================== 倒计时系统 ====================
+        function startCountdown() {
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        }
+        
+        function updateCountdown() {
+            const targetDate = new Date('January 1, 2026 00:00:00').getTime();
+            const now = new Date().getTime();
+            const timeLeft = targetDate - now;
+            
+            if (timeLeft < 0) {
+                document.getElementById('title').textContent = '🎊 2026已到来!';
+                document.getElementById('blessing').textContent = '新年快乐，万事如意！';
+                document.getElementById('blessing2').textContent = '愿新的一年充满喜悦与成功';
+                document.querySelector('.countdown').style.display = 'none';
+                return;
+            }
+            
+            const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+            
+            document.getElementById('days').textContent = days.toString().padStart(2, '0');
+            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+            document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+        }
+        
+        // ==================== 互动功能 ====================
+        // 点击屏幕放烟花
+        document.body.addEventListener('click', function(event) {
+            // 如果点击的是开始界面，不执行此函数
+            if (event.target.closest('#startScreen')) {
+                return;
+            }
+            
+            const x = event.clientX;
+            const y = event.clientY;
+            
+            createParticleFirework(x, y, true);
+            playFireworkSound(true);
+        });
+        
+        // 触摸屏支持
+        document.body.addEventListener('touchstart', function(event) {
+            if (event.target.closest('#startScreen')) {
+                return;
+            }
+            
+            event.preventDefault();
+            const touch = event.touches[0];
+            const x = touch.clientX;
+            const y = touch.clientY;
+            
+            createParticleFirework(x, y, true);
+            playFireworkSound(true);
+        }, { passive: false });
+        
+        // 点击音效
+       // 改进的烟花音效函数
+        function playFireworkSound(isClick = false) {
+            try {
+                // 创建音频上下文
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // 点击烟花使用更响亮的音效，自动烟花使用较轻微的音效
+                const volume = isClick ? 0.3 : 0.1;
+                
+                // 创建爆炸音效（主要部分）
+                createExplosionSound(audioContext, volume);
+                
+                // 添加一些随机的小爆炸声（仅对点击烟花）
+                if (isClick) {
+                    const smallExplosions = Math.floor(Math.random() * 3) + 1;
+                    for (let i = 0; i < smallExplosions; i++) {
+                        setTimeout(() => {
+                            createSmallExplosionSound(audioContext, volume * 0.5);
+                        }, 50 + i * 80);
+                    }
+                }
+                
+            } catch (error) {
+                // 如果音效失败，静默失败，不影响其他功能
+                console.log("音效不可用，但不影响动画功能");
+            }
+        }
+        
+        // 创建主要爆炸音效
+        function createExplosionSound(audioContext, volume) {
+            // 创建主振荡器（低音部分）
+            const mainOscillator = audioContext.createOscillator();
+            const mainGain = audioContext.createGain();
+            
+            // 创建高频振荡器（爆炸火花声）
+            const sparkOscillator = audioContext.createOscillator();
+            const sparkGain = audioContext.createGain();
+            
+            // 创建噪声振荡器（爆炸冲击声）
+            const noiseBuffer = createNoiseBuffer(audioContext);
+            const noiseSource = audioContext.createBufferSource();
+            const noiseGain = audioContext.createGain();
+            
+            // 连接所有节点
+            mainOscillator.connect(mainGain);
+            sparkOscillator.connect(sparkGain);
+            noiseSource.buffer = noiseBuffer;
+            noiseSource.connect(noiseGain);
+            
+            mainGain.connect(audioContext.destination);
+            sparkGain.connect(audioContext.destination);
+            noiseGain.connect(audioContext.destination);
+            
+            // 设置主振荡器参数（低音爆炸声）
+            mainOscillator.type = 'sine';
+            mainOscillator.frequency.setValueAtTime(120, audioContext.currentTime);
+            mainOscillator.frequency.exponentialRampToValueAtTime(40, audioContext.currentTime + 0.5);
+            
+            // 设置火花振荡器参数（高频火花声）
+            sparkOscillator.type = 'triangle';
+            sparkOscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+            sparkOscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.3);
+            
+            // 设置增益包络
+            mainGain.gain.setValueAtTime(0, audioContext.currentTime);
+            mainGain.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.01);
+            mainGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
+            
+            sparkGain.gain.setValueAtTime(0, audioContext.currentTime);
+            sparkGain.gain.linearRampToValueAtTime(volume * 0.7, audioContext.currentTime + 0.05);
+            sparkGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.4);
+            
+            noiseGain.gain.setValueAtTime(0, audioContext.currentTime);
+            noiseGain.gain.linearRampToValueAtTime(volume * 0.5, audioContext.currentTime + 0.02);
+            noiseGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
+            
+            // 播放所有声音
+            mainOscillator.start();
+            sparkOscillator.start();
+            noiseSource.start();
+            
+            // 停止声音
+            mainOscillator.stop(audioContext.currentTime + 0.5);
+            sparkOscillator.stop(audioContext.currentTime + 0.4);
+            noiseSource.stop(audioContext.currentTime + 0.3);
+        }
+        
+        // 创建小爆炸音效（用于次要爆炸）
+        function createSmallExplosionSound(audioContext, volume) {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            // 随机频率，使每次爆炸声音略有不同
+            const startFreq = 300 + Math.random() * 300;
+            const endFreq = 80 + Math.random() * 100;
+            
+            oscillator.type = ['sine', 'triangle', 'sawtooth'][Math.floor(Math.random() * 3)];
+            oscillator.frequency.setValueAtTime(startFreq, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(endFreq, audioContext.currentTime + 0.2);
+            
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.01);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.2);
+            
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.2);
+        }
+        
+        // 创建噪声缓冲区（用于爆炸冲击声）
+        function createNoiseBuffer(audioContext) {
+            const bufferSize = audioContext.sampleRate * 0.3; // 0.3秒的噪声
+            const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+            const output = buffer.getChannelData(0);
+            
+            // 填充噪声数据
+            for (let i = 0; i < bufferSize; i++) {
+                output[i] = Math.random() * 2 - 1; // 白噪声
+            }
+            
+            return buffer;
+        }
+
+        
+        // 防止右键菜单干扰
+        document.addEventListener('contextmenu', function(event) {
+            event.preventDefault();
+            return false;
+        });
+    </script>
+</body>
+</html>
